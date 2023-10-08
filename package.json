@@ -13,9 +13,12 @@
   },
   "dependencies": {
     "gh-pages": "^6.0.0",
+    "pdfjs-dist": "^3.11.174",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0"
+    "react-pdf": "^7.5.0",
+    "react-router-dom": "^6.16.0",
+    "worker-loader": "^3.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
