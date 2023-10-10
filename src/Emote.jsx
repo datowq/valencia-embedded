@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import catdance from '/catdance.gif';
+import catdance from '/catdance.gif'
 
 function Emote() {
   const [position, setPosition] = useState({ top: 0, left: 0})
@@ -12,7 +12,7 @@ function Emote() {
   const maxs = 0.012
 
   const getRandomArbitrary = (sign, min, max) => {
-    return sign * (Math.random() * (max - min) + min);
+    return sign * (Math.random() * (max - min) + min)
   }
 
   const updatePosition = () => {

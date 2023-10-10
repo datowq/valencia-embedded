@@ -6,7 +6,7 @@ import Resume from './Resume'
 const App = () => {
   return (
     <Router>
-      <Routes>
+      <Routes> 
         <Route path='/resume' element={<Resume />} />
         <Route path='/about'  element={<Resume />} />
         <Route path='/contact' element={<Resume />} />
