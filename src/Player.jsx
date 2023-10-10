@@ -1,27 +1,29 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import catgif from '/catdance.gif'
 
 // could update with a better data structure, but a resume really doesn't need it
+//fix movement, add jump
 function isPlayerCollidingWith(player, collisions) {
-
-  return collisions.some(box => {
-    if ((player.x + player.width) >= box.x &&
-        player.x <= (box.x + box.width) &&
-        (player.y + player.height) >= box.y &&
-        player.y <= (box.y + box.height)) {
-      // collision detected
-      return true
+  for (let i = 0; i < collisions.length; i++) {
+    const box = collisions[i];
+    if (
+      (player.x + player.width) >= box.x &&
+      player.x <= (box.x + box.width) &&
+      (player.y + player.height) >= box.y &&
+      player.y <= (box.y + box.height)
+    ) {
+      return { collision: true, index: i };
     }
-    return false
-  })
+  }
+  return { collision: false, index: -1 };
 }
-
 
 const Player = (props) => {
   const playerRef = useRef()
   const requestRef = useRef()
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [position, setPosition] = useState({ x: 100, y: 0 })
   const [velocity, setVelocity] = useState({ x: 0, y: 0 })
-  const gravity = 0
+  const gravity = 4
 
   const handleKeyDown = useCallback((event) => {
     event.preventDefault()
@@ -67,8 +69,15 @@ const Player = (props) => {
     let nextX = position.x + velocity.x
     let nextY = position.y + velocity.y + gravity
 
-    if (!isPlayerCollidingWith({ x: nextX, y: nextY, height: 50, width: 50 }, props.collisions)) {
+    const { collision, index } = isPlayerCollidingWith(
+      { x: nextX, y: nextY, height: 50, width: 20 },
+      props.collisions
+    );
+
+    if (!collision) {
       setPosition({ x: nextX, y: nextY })
+    } else {
+      props.handleCollision(index)
     }
   }, [position, velocity])
 
@@ -78,7 +87,7 @@ const Player = (props) => {
   }, [updatePlayerPosition])
   
   useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate) // Initial call to start the animation loop
+    requestRef.current = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(requestRef.current)
   }, [animate])
   
@@ -87,14 +96,15 @@ const Player = (props) => {
     position: 'absolute',
     left: position.x,
     top: position.y,
-    width: '50px',
+    width: '20px',
     height: '50px',
-    color: 'red'
-    // backgroundColor: 'black',
+    color: 'red',
+    backgroundColor: 'black',
   }
 
   return (
-    <img src='/catdance.gif' ref={playerRef} style={playerStyle}/>
+    // <img src={catgif} ref={playerRef} style={playerStyle}/>
+    <div style={playerStyle}></div>
   )
 }
 

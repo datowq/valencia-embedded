@@ -12,22 +12,34 @@ const Resume = () => {
   const [numPages, setNumPages] = useState(null)
   const [scale, setScale] = useState(1)
   const [collisionBoxes, setCollisionBoxes] = useState([])
+  const [collided, setCollided] = useState(false)
+  const [spanss, setSpanss] = useState([])
+  const [box, setBox] = useState(-1)
   const canvasRef = useRef(null)
   const viewerRef = useRef(null)
+
+  const collisionm = (i) => {
+    setCollided(true)
+    setBox(i)
+  }
+
+  useEffect(() => {
+    if(collided) {
+      spanss[box].style.color = 'red'
+      setCollided(false)
+    }
+  }, [collided])
 
   function calculateScale() {
     const viewer = document.getElementById('pdf-viewer')
     const viewerWidth = viewer ? viewer.clientWidth : 0
     return viewerWidth / (595.28 * 1.03) // 595.28 is the width of a standard A4 page at 72dpi
   }
-  
-  // useEffect(() => {
-  //   console.log(collisionBoxes)
-  // }, [collisionBoxes])
 
   useEffect(() => {
     const handleSpanManipulation = () => {
       const spans = document.querySelectorAll("span")
+      setSpanss(Array.from(spans))
       const spanRectangles = Array.from(spans).map(span => span.getBoundingClientRect())
       setCollisionBoxes(spanRectangles)
     }
@@ -78,7 +90,7 @@ const Resume = () => {
                     ))} 
             </Document>
         </div>
-        <Player collisions={collisionBoxes}/>
+        <Player collisions={collisionBoxes} handleCollision={collisionm}/>
     </>
   )
 }
