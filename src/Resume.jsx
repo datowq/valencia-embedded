@@ -25,7 +25,8 @@ const Resume = () => {
 
   useEffect(() => {
     if(collided) {
-      spanss[box].style.color = 'red'
+      // spanss[box].style.color = 'red'
+      // spanss[box].style.border = '2px solid black';
       setCollided(false)
     }
   }, [collided])

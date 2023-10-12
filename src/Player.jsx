@@ -6,12 +6,10 @@ import catgif from '/catdance.gif'
 function isPlayerCollidingWith(player, collisions) {
   for (let i = 0; i < collisions.length; i++) {
     const box = collisions[i];
-    if (
-      (player.x + player.width) >= box.x &&
+    if ((player.x + player.width) >= box.x &&
       player.x <= (box.x + box.width) &&
       (player.y + player.height) >= box.y &&
-      player.y <= (box.y + box.height)
-    ) {
+      player.y <= (box.y + box.height)) {
       return { collision: true, index: i };
     }
   }
@@ -23,19 +21,41 @@ const Player = (props) => {
   const requestRef = useRef()
   const [position, setPosition] = useState({ x: 100, y: 0 })
   const [velocity, setVelocity] = useState({ x: 0, y: 0 })
+  const [isOnGround, setIsOnGround] = useState(false)
   const gravity = 4
+
+  function getCollisionDirection(player, collisions, index) {
+    if (index === -1) {
+      return { top: false, bottom: false, left: false, right: false };
+    }
+  
+    const box = collisions[index];
+    const playerRight = player.x + player.width;
+    const playerBottom = player.y + player.height;
+    const boxRight = box.x + box.width;
+    const boxBottom = box.y + box.height;
+  
+    const collisionSides = {
+      top: playerBottom >= box.y && player.y <= box.y,
+      bottom: player.y <= boxBottom && playerBottom >= boxBottom,
+      left: playerRight >= box.x && player.x <= box.x,
+      right: player.x <= boxRight && playerRight >= boxRight,
+    };
+  
+    return collisionSides;
+  }
 
   const handleKeyDown = useCallback((event) => {
     event.preventDefault()
     if (event.key === 'r') {
       setVelocity({ x: 0, y: 0})
-      setPosition({ x: 0, y: 0})
+      setPosition({ x: 100, y: 0})
     }
     if (event.key === 'a') {
-      setVelocity(prevVelocity => ({ x: -5, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: -3, y: prevVelocity.y }))
     }
     if (event.key === 'd') {
-      setVelocity(prevVelocity => ({ x: 5, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: 3, y: prevVelocity.y }))
     }
     if (event.key === 's') {
       setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 10 }))
@@ -65,21 +85,43 @@ const Player = (props) => {
   }, [handleKeyDown, handleKeyUp])
   
   const updatePlayerPosition = useCallback(() => {
-    
-    let nextX = position.x + velocity.x
-    let nextY = position.y + velocity.y + gravity
-
+    let nextX = position.x + velocity.x;
+    let nextY = position.y + velocity.y + gravity;
+  
     const { collision, index } = isPlayerCollidingWith(
       { x: nextX, y: nextY, height: 50, width: 20 },
       props.collisions
     );
 
+    // console.log(isOnGround)
+  
     if (!collision) {
-      setPosition({ x: nextX, y: nextY })
+      setPosition({ x: nextX, y: nextY });
+      setIsOnGround(false)
     } else {
-      props.handleCollision(index)
+      setIsOnGround(false)
+      const collisionSides = getCollisionDirection(
+        { x: nextX, y: nextY, height: 50, width: 20 },
+        props.collisions,
+        index
+      )
+      if (collisionSides.left && velocity.x >= 0) {
+        nextX = position.x;
+      }
+      if (collisionSides.right && velocity.x <= 0) {
+        nextX = position.x;
+      }
+      if (collisionSides.top && (velocity.y + gravity) >= 0) {
+        nextY = position.y;
+        setIsOnGround(true)
+      }
+      if (collisionSides.bottom && (velocity.y + gravity)<= 0) {
+        nextY = position.y;
+      }
+  
+      setPosition({ x: nextX, y: nextY });
     }
-  }, [position, velocity])
+  }, [position, velocity, props.collisions, gravity]);
 
   const animate = useCallback(() => {
     updatePlayerPosition()
