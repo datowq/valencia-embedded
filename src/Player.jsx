@@ -25,8 +25,11 @@ const Player = (props) => {
   const requestRef = useRef()
   const [position, setPosition] = useState({ x: 100, y: 0 })
   const [velocity, setVelocity] = useState({ x: 0, y: 0 })
+  const [deltaTime, setDeltaTime] = useState(0)
+  const [lastTime, setLastTime] = useState(0)
   const [isOnGround, setIsOnGround] = useState(false)
-  const gravity = 0.1
+  const gravity = 5
+  const frametime = 1000 / 120
 
   function getCollisionDirection(player, collisions, collisionList) {
 
@@ -57,18 +60,20 @@ const Player = (props) => {
       setPosition({ x: 100, y: 0})
     }
     if (event.key === 'a') {
-      setVelocity(prevVelocity => ({ x: -1, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: -3, y: prevVelocity.y }))
     }
     if (event.key === 'd') {
-      setVelocity(prevVelocity => ({ x: 1, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: 3, y: prevVelocity.y }))
     }
     if (event.key === 's') {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 1 }))
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 5 }))
     }
-    if (event.key === ' ' || event.key === 'w') {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -1 }))
+    if ((event.key === ' ' || event.key === 'w') && isOnGround) {
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -5 }))
+      setIsOnGround(false)
     }
-  }, [])
+
+  }, [isOnGround])
 
   const handleKeyUp = useCallback((event) => {
     if (event.key === 'a' || event.key === 'd') {
@@ -90,8 +95,8 @@ const Player = (props) => {
   }, [handleKeyDown, handleKeyUp])
   
   const updatePlayerPosition = useCallback(() => {
-    let nextX = position.x + velocity.x;
-    let nextY = position.y + velocity.y + gravity;
+    let nextX = position.x + velocity.x * deltaTime;
+    let nextY = position.y + velocity.y * deltaTime + (0.5 * gravity * deltaTime**2);
 
     const pheight = playerRef.current.clientHeight;
     const pwidth = playerRef.current.clientWidth;
@@ -101,12 +106,9 @@ const Player = (props) => {
       { x: nextX, y: nextY, height: pheight, width: pwidth },
       props.collisions
     );
-
-    // console.log(isOnGround)
   
     if (!collisionList[0].collision) {
       setPosition({ x: nextX, y: nextY });
-      console.log("hi")
       setIsOnGround(false)
     } else {
       setIsOnGround(false)
@@ -137,7 +139,9 @@ const Player = (props) => {
     }
   }, [position, velocity, props.collisions, gravity]);
 
-  const animate = useCallback(() => {
+  const animate = useCallback((timestamp) => {
+    setDeltaTime((timestamp - lastTime) / frametime)
+    setLastTime(timestamp)
     updatePlayerPosition()
     requestRef.current = requestAnimationFrame(animate)
   }, [updatePlayerPosition])
@@ -159,8 +163,8 @@ const Player = (props) => {
   }
 
   return (
-    // <img src={catgif} ref={playerRef} style={playerStyle}/>
-    <div ref={playerRef} style={playerStyle}></div>
+    <img src={catgif} ref={playerRef} style={playerStyle}/>
+    // <div ref={playerRef} style={playerStyle}></div>
   )
 }
 
