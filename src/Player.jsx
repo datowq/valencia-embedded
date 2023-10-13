@@ -1,25 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import catgif from '/catdance.gif'
 
-// could update with a better data structure, but a resume really doesn't need it
-//fix movement, add jump
-function isPlayerCollidingWith(player, collisions) {
-  let collisionList = []
-  for (let i = 0; i < collisions.length; i++) {
-    const box = collisions[i];
-    if ((player.x + player.width) >= box.x &&
-      player.x <= (box.x + box.width) &&
-      (player.y + player.height) >= box.y &&
-      player.y <= (box.y + box.height)) {
-      collisionList.push({ collision: true, index: i })
-    }
-  }
-  if(collisionList.length === 0) { 
-    collisionList.push({ collision: false, index: -1 })
-  }
-  return collisionList;
-}
-
 const Player = (props) => {
   const playerRef = useRef()
   const requestRef = useRef()
@@ -28,30 +9,39 @@ const Player = (props) => {
   const [deltaTime, setDeltaTime] = useState(0)
   const [lastTime, setLastTime] = useState(0)
   const [isOnGround, setIsOnGround] = useState(false)
-  const gravity = 5
+  const [isJumping, setIsJumping] = useState(false)
+  const gravity = 9.8
   const frametime = 1000 / 120
 
-  function getCollisionDirection(player, collisions, collisionList) {
+  // could update with a quadtree, but a resume really doesn't need it
+  // fix movement, add jump  
+  const getCollisionDirection = useCallback((player, collisions) => {
 
     let collisionSides = []
     
-    for(let i = 0; i < collisionList.length; i++) {
-      const box = collisions[collisionList[i].index];
-      const playerRight = player.x + player.width;
-      const playerBottom = player.y + player.height;
-      const boxRight = box.x + box.width;
-      const boxBottom = box.y + box.height;
-    
-      collisionSides.push({
-        top: playerBottom >= box.y && player.y <= box.y,
-        bottom: player.y <= boxBottom && playerBottom >= boxBottom,
-        left: playerRight >= box.x && player.x <= box.x,
-        right: player.x <= boxRight && playerRight >= boxRight,
-      })
+    for(let i = 0; i < collisions.length; i++) {
+      const box = collisions[i]
+      const playerRight = player.x + player.width
+      const playerBottom = player.y + player.height
+      const boxRight = box.x + box.width
+      const boxBottom = box.y + box.height
+
+      if((player.x + player.width) >= box.x &&
+      player.x <= (box.x + box.width) &&
+      (player.y + player.height) >= box.y &&
+      player.y <= (box.y + box.height)) {
+          collisionSides.push({
+            index: i,
+            top: playerBottom >= box.y && player.y <= box.y,
+            bottom: player.y <= boxBottom && playerBottom >= boxBottom,
+            left: playerRight >= box.x && player.x <= box.x,
+            right: player.x <= boxRight && playerRight >= boxRight,
+          })
+      }
     }
   
-    return collisionSides;
-  }
+    return collisionSides
+  })
 
   const handleKeyDown = useCallback((event) => {
     event.preventDefault()
@@ -60,26 +50,28 @@ const Player = (props) => {
       setPosition({ x: 100, y: 0})
     }
     if (event.key === 'a') {
-      setVelocity(prevVelocity => ({ x: -3, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: -5, y: prevVelocity.y }))
     }
     if (event.key === 'd') {
-      setVelocity(prevVelocity => ({ x: 3, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: 5, y: prevVelocity.y }))
     }
     if (event.key === 's') {
       setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 5 }))
     }
-    if ((event.key === ' ' || event.key === 'w') && isOnGround) {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -5 }))
+    if ((event.key === ' ' || event.key === 'w') && isOnGround && !isJumping) {
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -20 }))
+      setIsJumping(true)
       setIsOnGround(false)
     }
 
-  }, [isOnGround])
+  }, [isOnGround, isJumping])
 
   const handleKeyUp = useCallback((event) => {
     if (event.key === 'a' || event.key === 'd') {
       setVelocity(prevVelocity => ({ x: 0, y: prevVelocity.y }))
     }
     if (event.key === ' ' || event.key == 's' || event.key === 'w') {
+      setIsJumping(false)
       setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 0}))
     }
   }, [])
@@ -95,49 +87,44 @@ const Player = (props) => {
   }, [handleKeyDown, handleKeyUp])
   
   const updatePlayerPosition = useCallback(() => {
-    let nextX = position.x + velocity.x * deltaTime;
-    let nextY = position.y + velocity.y * deltaTime + (0.5 * gravity * deltaTime**2);
+    if(isJumping) {
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: prevVelocity.y * 0.9 }));
+    }
+    let nextX = position.x + velocity.x * deltaTime
+    let nextY = position.y + velocity.y * deltaTime + (0.5 * gravity * deltaTime**2)
 
-    const pheight = playerRef.current.clientHeight;
-    const pwidth = playerRef.current.clientWidth;
-
+    const pheight = playerRef.current.clientHeight
+    const pwidth = playerRef.current.clientWidth
   
-    const collisionList = isPlayerCollidingWith(
+    const collisionSides = getCollisionDirection(
       { x: nextX, y: nextY, height: pheight, width: pwidth },
       props.collisions
-    );
-  
-    if (!collisionList[0].collision) {
-      setPosition({ x: nextX, y: nextY });
-      setIsOnGround(false)
+    )
+      
+    setIsOnGround(false)
+    if (collisionSides.length === 0) {
+      setPosition({ x: nextX, y: nextY })
     } else {
-      setIsOnGround(false)
-      const collisionSides = getCollisionDirection(
-        { x: nextX, y: nextY, height: pheight, width: pwidth },
-        props.collisions,
-        collisionList
-      )
-
       for(let i = 0; i < collisionSides.length; i++) 
       {
         if (collisionSides[i].left && velocity.x >= 0) {
-          nextX = position.x;
+          nextX = position.x
         }
         if (collisionSides[i].right && velocity.x <= 0) {
-          nextX = position.x;
+          nextX = position.x
         }
         if (collisionSides[i].top && (velocity.y + gravity) >= 0) {
-          nextY = position.y;
+          nextY = position.y
           setIsOnGround(true)
         }
         if (collisionSides[i].bottom && (velocity.y + gravity) <= 0) {
-          nextY = position.y;
+          nextY = position.y
         }
       }
   
-      setPosition({ x: nextX, y: nextY });
+      setPosition({ x: nextX, y: nextY })
     }
-  }, [position, velocity, props.collisions, gravity]);
+  }, [position, velocity, playerRef, gravity])
 
   const animate = useCallback((timestamp) => {
     setDeltaTime((timestamp - lastTime) / frametime)
