@@ -150,8 +150,8 @@ const Player = (props) => {
   }
 
   return (
-    <img src={catgif} ref={playerRef} style={playerStyle}/>
-    // <div ref={playerRef} style={playerStyle}></div>
+    // <img src={catgif} ref={playerRef} style={playerStyle}/>
+    <div ref={playerRef} style={playerStyle}></div>
   )
 }
 

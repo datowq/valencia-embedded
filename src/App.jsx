@@ -1,7 +1,7 @@
 import React from 'react'
 import { HashRouter as Router, Route, Routes } from 'react-router-dom'
 import Emote from './Emote'
-import Resume from './Resume'
+import Resume from './resumegame/Resume'
 
 const App = () => {
   return (

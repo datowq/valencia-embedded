@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Document, Page } from 'react-pdf'
 import { pdfjs } from 'react-pdf'
-import resume from './data/resume.pdf'
+import resume from '../data/resume.pdf'
 import 'react-pdf/dist/Page/TextLayer.css'
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import Player from "./Player"
+import Door from "./Door"
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
@@ -15,7 +16,6 @@ const Resume = () => {
   const [collided, setCollided] = useState(false)
   const [spanss, setSpanss] = useState([])
   const [box, setBox] = useState(-1)
-  const canvasRef = useRef(null)
   const viewerRef = useRef(null)
 
   const collisionm = (i) => {
@@ -43,10 +43,10 @@ const Resume = () => {
       const nonEmptySpans = Array.from(spans).filter(span => {
         return span.textContent.trim() !== "" && span.textContent.trim() !== "|";
       });
-      setSpanss(Array.from(nonEmptySpans))
-      nonEmptySpans.forEach((span, i) => {
-        span.style.border = '2px solid black'
-      })
+      // setSpanss(Array.from(nonEmptySpans))
+      // nonEmptySpans.forEach((span, i) => {
+      //   span.style.border = '2px solid black'
+      // })
       const spanRectangles = Array.from(nonEmptySpans).map(span => span.getBoundingClientRect())
       setCollisionBoxes(spanRectangles)
     }
@@ -85,7 +85,7 @@ const Resume = () => {
         left: 0, 
         width: '100%', 
         height: '100%',
-        overflow: 'scroll'}}>
+        overflow: 'hidden'}}>
             <Document 
             file={resume}>
                 {Array.from(new Array(numPages), (el, index) => (
@@ -97,6 +97,7 @@ const Resume = () => {
                     ))} 
             </Document>
         </div>
+        <Door/>
         <Player collisions={collisionBoxes} handleCollision={collisionm}/>
     </>
   )
