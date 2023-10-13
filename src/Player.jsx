@@ -26,7 +26,7 @@ const Player = (props) => {
   const [position, setPosition] = useState({ x: 100, y: 0 })
   const [velocity, setVelocity] = useState({ x: 0, y: 0 })
   const [isOnGround, setIsOnGround] = useState(false)
-  const gravity = 4
+  const gravity = 0.1
 
   function getCollisionDirection(player, collisions, collisionList) {
 
@@ -57,16 +57,16 @@ const Player = (props) => {
       setPosition({ x: 100, y: 0})
     }
     if (event.key === 'a') {
-      setVelocity(prevVelocity => ({ x: -3, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: -1, y: prevVelocity.y }))
     }
     if (event.key === 'd') {
-      setVelocity(prevVelocity => ({ x: 3, y: prevVelocity.y }))
+      setVelocity(prevVelocity => ({ x: 1, y: prevVelocity.y }))
     }
     if (event.key === 's') {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 10 }))
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: 1 }))
     }
     if (event.key === ' ' || event.key === 'w') {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -10 }))
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: -1 }))
     }
   }, [])
 
@@ -92,9 +92,13 @@ const Player = (props) => {
   const updatePlayerPosition = useCallback(() => {
     let nextX = position.x + velocity.x;
     let nextY = position.y + velocity.y + gravity;
+
+    const pheight = playerRef.current.clientHeight;
+    const pwidth = playerRef.current.clientWidth;
+
   
     const collisionList = isPlayerCollidingWith(
-      { x: nextX, y: nextY, height: 30, width: 20 },
+      { x: nextX, y: nextY, height: pheight, width: pwidth },
       props.collisions
     );
 
@@ -102,11 +106,12 @@ const Player = (props) => {
   
     if (!collisionList[0].collision) {
       setPosition({ x: nextX, y: nextY });
+      console.log("hi")
       setIsOnGround(false)
     } else {
       setIsOnGround(false)
       const collisionSides = getCollisionDirection(
-        { x: nextX, y: nextY, height: 30, width: 20 },
+        { x: nextX, y: nextY, height: pheight, width: pwidth },
         props.collisions,
         collisionList
       )
@@ -147,15 +152,15 @@ const Player = (props) => {
     position: 'absolute',
     left: position.x,
     top: position.y,
-    width: '20px',
-    height: '30px',
+    width: '1.5vw',
+    height: '3.5vw',
     color: 'red',
     backgroundColor: 'black',
   }
 
   return (
     // <img src={catgif} ref={playerRef} style={playerStyle}/>
-    <div style={playerStyle}></div>
+    <div ref={playerRef} style={playerStyle}></div>
   )
 }
 

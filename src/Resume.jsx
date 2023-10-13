@@ -40,8 +40,14 @@ const Resume = () => {
   useEffect(() => {
     const handleSpanManipulation = () => {
       const spans = document.querySelectorAll("span")
-      setSpanss(Array.from(spans))
-      const spanRectangles = Array.from(spans).map(span => span.getBoundingClientRect())
+      const nonEmptySpans = Array.from(spans).filter(span => {
+        return span.textContent.trim() !== "" && span.textContent.trim() !== "|";
+      });
+      setSpanss(Array.from(nonEmptySpans))
+      nonEmptySpans.forEach((span, i) => {
+        span.style.border = '2px solid black'
+      })
+      const spanRectangles = Array.from(nonEmptySpans).map(span => span.getBoundingClientRect())
       setCollisionBoxes(spanRectangles)
     }
 
