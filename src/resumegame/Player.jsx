@@ -88,7 +88,7 @@ const Player = (props) => {
   
   const updatePlayerPosition = useCallback(() => {
     if(isJumping) {
-      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: prevVelocity.y * 0.9 }));
+      setVelocity(prevVelocity => ({ x: prevVelocity.x, y: prevVelocity.y * 0.95 }));
     }
     let nextX = position.x + velocity.x * deltaTime
     let nextY = position.y + velocity.y * deltaTime + (0.5 * gravity * deltaTime**2)
