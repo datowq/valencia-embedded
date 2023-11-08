@@ -4,22 +4,47 @@ import './styles.css'
 const Credits = () => {
 
     const [click, setClick] = useState(false)
-
-    const dots = ['.', '..', '...', '....', '.....']
+    const [currentCredits, setcurrentCredits] = useState(0)
     const [currentDot, setCurrentDot] = useState(0)
 
+    const dots = ['.', '..', '...', '....', '.....']
     const titles = ['engineering & design', 'modeling & texturing', '2d art', 'inspirations']
-    const [currentTitle, setCurrentTitle] = useState(0)
+    const credits = [
+        {
+            'name1': 'andy',
+            'name2': 'all',
+            'name3': ' ',
+            'name4': ' '
+        },
+        {
+            'name1': 'andy',
+            'name2': 'all',
+            'name3': ' ',
+            'name4': ' '
+        },
+        {
+            'name1': 'lereners',
+            'name2': 'all',
+            'name3': ' ',
+            'name4': ' '
+        },
+        {
+            'name1': 'unbeatable [white label]',
+            'name2': 'd-cell games',
+            'name3': 'bruno-simon.com',
+            'name4': 'bruno simon'
+        }
+    ]
 
     const handleClick = () => {
-        setCurrentTitle((currentTitle + 1) % titles.length)
+        setcurrentCredits((currentCredits + 1) % titles.length)
         setCurrentDot(0)
         setClick(!click)
     }
 
     useEffect(() => {
         const titleInterval = setInterval(() => {
-            setCurrentTitle((prev) => (prev + 1) % titles.length)
+            setcurrentCredits((prev) => (prev + 1) % titles.length)
         }, 5000)
 
         const dotInterval = setInterval(() => {
@@ -44,14 +69,14 @@ const Credits = () => {
                         <span>valencia</span><span>2023</span>
                     </div>
                 </div>
-                <div className="mb-10"> 
-                    <h2 className="text-4xl sm:text-6xl">{titles[currentTitle]}</h2>
+                <div className="mb-10 w-3/4 md:w-3/5 lg:w-2/4"> 
+                    <h2 className="text-4xl md:text-6xl">{titles[currentCredits]}</h2>
                     <div className='flex flex-col text-xl sm:text-3xl'>
                         <div className='flex justify-between'>
-                            <span>andy</span><span>all</span>
+                            <span>{credits[currentCredits]['name1']}</span><span>{credits[currentCredits]['name2']}</span>
                         </div>
-                        <div className='flex justify-between'> 
-                            <span>lauren</span><span>all</span>
+                        <div className='flex justify-between whitespace-pre'> 
+                            <span>{credits[currentCredits]['name3']}</span><span>{credits[currentCredits]['name4']}</span>
                         </div>
                     </div>
                 </div>
