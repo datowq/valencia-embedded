@@ -8,7 +8,7 @@ const Credits = () => {
     const [currentDot, setCurrentDot] = useState(0)
 
     const dots = ['.', '..', '...', '....', '.....']
-    const titles = ['engineering & design', 'modeling & texturing', '2d art', 'inspirations']
+    const titles = ['engineering & design', 'modeling & texturing', 'inspirations']
     const credits = [
         {
             'name1': 'andy',
@@ -18,12 +18,6 @@ const Credits = () => {
         },
         {
             'name1': 'andy',
-            'name2': 'all',
-            'name3': ' ',
-            'name4': ' '
-        },
-        {
-            'name1': 'lereners',
             'name2': 'all',
             'name3': ' ',
             'name4': ' '
