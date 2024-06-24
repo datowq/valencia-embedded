@@ -48,7 +48,12 @@ const collisionDetection = (player, collisionBoxes) => {
   return collisionSides;
 };
 
-const Player = ({ startGame, currentCollisionBoxes, renderScale }) => {
+const Player = ({
+  startGame,
+  currentCollisionBoxes,
+  renderScale,
+  isDocumentLoaded,
+}) => {
   const playerSpeed = useRef(30);
   const playerJump = useRef(50);
   const gravity = useRef(20);
@@ -189,12 +194,14 @@ const Player = ({ startGame, currentCollisionBoxes, renderScale }) => {
 
   useEffect(() => {
     if (!startGame) return;
+    if (!isDocumentLoaded) return;
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [animate, startGame]);
+  }, [animate, startGame, isDocumentLoaded]);
 
   useEffect(() => {
     if (!startGame) return;
+    if (!isDocumentLoaded) return;
     setTimeout(() => {
       setPosition({ x: 100, y: 10 });
       velocity.current = { x: 0, y: 0 };
@@ -202,7 +209,7 @@ const Player = ({ startGame, currentCollisionBoxes, renderScale }) => {
       isJumping.current = false;
       setOpacity(1);
     }, 1000);
-  }, [startGame]);
+  }, [startGame, isDocumentLoaded]);
 
   const playerStyle = {
     position: "absolute",
@@ -217,7 +224,8 @@ const Player = ({ startGame, currentCollisionBoxes, renderScale }) => {
   };
 
   return (
-    startGame && (
+    startGame &&
+    isDocumentLoaded && (
       // <img src={catgif} ref={playerRef} style={playerStyle}/>
       <div ref={playerRef} style={playerStyle}>
         {fps}

@@ -7,6 +7,7 @@ import Player from "./Player";
 const ResumeGameManager = () => {
   const currentCollisionBoxes = useRef([]);
   const [startGame, setStartGame] = useState(false);
+  const [isDocumentLoaded, setIsDocumentLoaded] = useState(false);
   const [renderScale, setRenderScale] = useState(1);
 
   useEffect(() => {
@@ -21,11 +22,14 @@ const ResumeGameManager = () => {
         currentCollisionBoxes={currentCollisionBoxes}
         renderScale={renderScale}
         setRenderScale={setRenderScale}
+        isDocumentLoaded={isDocumentLoaded}
+        setIsDocumentLoaded={setIsDocumentLoaded}
       />
       <Player
         startGame={startGame}
         currentCollisionBoxes={currentCollisionBoxes}
         renderScale={renderScale}
+        isDocumentLoaded={isDocumentLoaded}
       />
     </>
   );

@@ -19,12 +19,12 @@ const Resume = ({
   currentCollisionBoxes,
   renderScale,
   setRenderScale,
+  isDocumentLoaded,
+  setIsDocumentLoaded,
 }) => {
-  // const pdfCollisionBoxes = useRef([]);
   const viewerRef = useRef(null);
   const documentRef = useRef(null);
   const [numPages, setNumPages] = useState(null);
-  const [isDocumentLoaded, setIsDocumentLoaded] = useState(false);
 
   useEffect(() => {
     function handleSpanManipulation() {
