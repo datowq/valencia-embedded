@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Document, Page } from "react-pdf";
 import LoadingSpinner from "../utils/LoadingSpinner";
-import Player from "./Player";
-import Door from "./Door";
 
 import { pdfjs } from "react-pdf";
 import ResumePDF from "./data/resume.pdf";
@@ -16,27 +14,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
-const Resume = () => {
-  const [collisionBoxes, setCollisionBoxes] = useState([]);
-  const [collided, setCollided] = useState(false);
-  const [box, setBox] = useState(-1);
-
+const Resume = ({ startGame, currentCollisionBoxes }) => {
+  // const pdfCollisionBoxes = useRef([]);
   const viewerRef = useRef(null);
+  const documentRef = useRef(null);
   const [scale, setScale] = useState(1);
-  const [onStartScreen, setOnStartScreen] = useState(true);
   const [numPages, setNumPages] = useState(null);
   const [isDocumentLoaded, setIsDocumentLoaded] = useState(false);
-
-  const collisionm = (i) => {
-    setCollided(true);
-    setBox(i);
-  };
-
-  useEffect(() => {
-    if (collided) {
-      setCollided(false);
-    }
-  }, [collided]);
 
   useEffect(() => {
     function handleSpanManipulation() {
@@ -48,14 +32,17 @@ const Resume = () => {
         );
       });
 
-      nonEmptySpans.forEach((span, _) => {
-        span.style.border = "2px solid black";
-      });
+      // nonEmptySpans.forEach((span, _) => {
+      //   span.style.border = "2px solid black";
+      // });
 
       const spanRectangles = Array.from(nonEmptySpans).map((span) =>
         span.getBoundingClientRect()
       );
-      setCollisionBoxes(spanRectangles);
+      // setPdfCollisionBoxes(spanRectangles);
+      // pdfCollisionBoxes.current = spanRectangles;
+      // console.log("from resume", pdfCollisionBoxes.current);
+      currentCollisionBoxes.current = spanRectangles;
     }
 
     const observer = new MutationObserver(handleSpanManipulation);
@@ -73,8 +60,11 @@ const Resume = () => {
   }
 
   useEffect(() => {
+    if (!isDocumentLoaded) return;
+
     function handleResize() {
       setScale(calculateScale());
+      console.log("scale", calculateScale());
     }
 
     window.addEventListener("resize", handleResize);
@@ -83,7 +73,7 @@ const Resume = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [onStartScreen]);
+  }, [isDocumentLoaded]);
 
   const handleDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -91,44 +81,30 @@ const Resume = () => {
   };
 
   return (
-    <>
-      {onStartScreen ? (
-        <div className="z-10 text-8xl text-black bg-white select-none flex flex-col w-full h-full font-chronotype justify-center items-center text-center">
-          <div>resume world</div>
-          <button className="text-4xl" onClick={() => setOnStartScreen(false)}>
-            start
-          </button>
-        </div>
-      ) : (
-        <>
-          <div
-            ref={viewerRef}
-            className="z-0 w-full h-full fixed top-0 left-0 overflow-hidden bg-white select-none"
+    startGame && (
+      <>
+        <div
+          ref={viewerRef}
+          className="z-0 w-full h-full fixed top-0 left-0 overflow-hidden bg-white select-none"
+        >
+          <Document
+            ref={documentRef}
+            file={ResumePDF}
+            onLoadSuccess={handleDocumentLoadSuccess}
+            loading={<LoadingSpinner />}
           >
-            <Document
-              file={ResumePDF}
-              onLoadSuccess={handleDocumentLoadSuccess}
-              loading={<LoadingSpinner />}
-            >
-              {Array.from(new Array(numPages), (el, index) => (
-                <Page
-                  key={`page_${index + 1}`}
-                  pageNumber={index + 1}
-                  scale={scale}
-                  textLayerMode={1}
-                />
-              ))}
-            </Document>
-          </div>
-          {isDocumentLoaded && (
-            <Player
-              collisionBoxes={collisionBoxes}
-              handleCollision={collisionm}
-            />
-          )}
-        </>
-      )}
-    </>
+            {Array.from(new Array(numPages), (el, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                scale={scale}
+                textLayerMode={1}
+              />
+            ))}
+          </Document>
+        </div>
+      </>
+    )
   );
 };
 

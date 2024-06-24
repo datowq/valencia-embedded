@@ -48,7 +48,7 @@ const collisionDetection = (player, collisionBoxes) => {
   return collisionSides;
 };
 
-const Player = (props) => {
+const Player = ({ startGame, currentCollisionBoxes }) => {
   const playerSpeed = useRef(35);
   const playerJump = useRef(60);
   const gravity = useRef(20);
@@ -56,6 +56,7 @@ const Player = (props) => {
   const playerRef = useRef();
   const requestRef = useRef();
   const [position, setPosition] = useState({ x: 100, y: 10 });
+  const [opacity, setOpacity] = useState(0);
   const velocity = useRef({ x: 0, y: 0 });
   const isOnGround = useRef(false);
   const isJumping = useRef(false);
@@ -79,13 +80,13 @@ const Player = (props) => {
         velocity.current = { x: 0, y: 0 };
         setPosition({ x: 100, y: 10 });
       }
-      if (e.key === "a") {
+      if (e.key === "a" || e.key === "ArrowLeft") {
         keys.current.left = true;
       }
-      if (e.key === "d") {
+      if (e.key === "d" || e.key === "ArrowRight") {
         keys.current.right = true;
       }
-      if (e.key === "w") {
+      if (e.key === "w" || e.key === " " || e.key === "ArrowUp") {
         keys.current.up = true;
         if (isOnGround.current && !isJumping.current) {
           velocity.current.y = -playerJump.current;
@@ -99,13 +100,13 @@ const Player = (props) => {
 
   const handleKeyUp = useCallback((e) => {
     e.preventDefault();
-    if (e.key === "a") {
+    if (e.key === "a" || e.key === "ArrowLeft") {
       keys.current.left = false;
     }
-    if (e.key === "d") {
+    if (e.key === "d" || e.key === "ArrowRight") {
       keys.current.right = false;
     }
-    if (e.key === "w") {
+    if (e.key === "w" || e.key === " " || e.key === "ArrowUp") {
       keys.current.up = false;
     }
     if (e.key === "r") {
@@ -144,7 +145,7 @@ const Player = (props) => {
 
     const collisionSides = collisionDetection(
       { x: nextX, y: nextY, height: pheight, width: pwidth },
-      props.collisionBoxes
+      currentCollisionBoxes.current
     );
 
     isOnGround.current = false;
@@ -170,7 +171,7 @@ const Player = (props) => {
         setPosition({ x: nextX, y: nextY });
       });
     }
-  }, [position, props.collisionBoxes]);
+  }, [position, currentCollisionBoxes]);
 
   const animate = useCallback(
     (currTime) => {
@@ -187,9 +188,21 @@ const Player = (props) => {
   );
 
   useEffect(() => {
+    if (!startGame) return;
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [animate]);
+  }, [animate, startGame]);
+
+  useEffect(() => {
+    if (!startGame) return;
+    setTimeout(() => {
+      setPosition({ x: 100, y: 10 });
+      velocity.current = { x: 0, y: 0 };
+      isOnGround.current = false;
+      isJumping.current = false;
+      setOpacity(1);
+    }, 500);
+  }, [startGame]);
 
   const playerStyle = {
     position: "absolute",
@@ -197,15 +210,18 @@ const Player = (props) => {
     top: position.y,
     width: "1.5vw",
     height: "3.5vw",
+    opacity: opacity,
     color: "red",
     backgroundColor: "black",
   };
 
   return (
-    // <img src={catgif} ref={playerRef} style={playerStyle}/>
-    <div ref={playerRef} style={playerStyle}>
-      {fps}
-    </div>
+    startGame && (
+      // <img src={catgif} ref={playerRef} style={playerStyle}/>
+      <div ref={playerRef} style={playerStyle}>
+        {fps}
+      </div>
+    )
   );
 };
 
