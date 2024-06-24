@@ -48,9 +48,9 @@ const collisionDetection = (player, collisionBoxes) => {
   return collisionSides;
 };
 
-const Player = ({ startGame, currentCollisionBoxes }) => {
-  const playerSpeed = useRef(35);
-  const playerJump = useRef(60);
+const Player = ({ startGame, currentCollisionBoxes, renderScale }) => {
+  const playerSpeed = useRef(30);
+  const playerJump = useRef(50);
   const gravity = useRef(20);
 
   const playerRef = useRef();
@@ -137,8 +137,8 @@ const Player = ({ startGame, currentCollisionBoxes }) => {
       velocity.current.y += gravity.current * scaledDeltaTime;
     }
 
-    let nextX = position.x + velocity.current.x * scaledDeltaTime;
-    let nextY = position.y + velocity.current.y * scaledDeltaTime;
+    let nextX = position.x + velocity.current.x * scaledDeltaTime * renderScale;
+    let nextY = position.y + velocity.current.y * scaledDeltaTime * renderScale;
 
     const pheight = playerRef.current.clientHeight;
     const pwidth = playerRef.current.clientWidth;
@@ -171,7 +171,7 @@ const Player = ({ startGame, currentCollisionBoxes }) => {
         setPosition({ x: nextX, y: nextY });
       });
     }
-  }, [position, currentCollisionBoxes]);
+  }, [position, currentCollisionBoxes, renderScale]);
 
   const animate = useCallback(
     (currTime) => {
@@ -201,7 +201,7 @@ const Player = ({ startGame, currentCollisionBoxes }) => {
       isOnGround.current = false;
       isJumping.current = false;
       setOpacity(1);
-    }, 500);
+    }, 1000);
   }, [startGame]);
 
   const playerStyle = {
@@ -210,6 +210,7 @@ const Player = ({ startGame, currentCollisionBoxes }) => {
     top: position.y,
     width: "1.5vw",
     height: "3.5vw",
+    scale: renderScale,
     opacity: opacity,
     color: "red",
     backgroundColor: "black",

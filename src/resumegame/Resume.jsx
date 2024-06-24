@@ -14,11 +14,15 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
-const Resume = ({ startGame, currentCollisionBoxes }) => {
+const Resume = ({
+  startGame,
+  currentCollisionBoxes,
+  renderScale,
+  setRenderScale,
+}) => {
   // const pdfCollisionBoxes = useRef([]);
   const viewerRef = useRef(null);
   const documentRef = useRef(null);
-  const [scale, setScale] = useState(1);
   const [numPages, setNumPages] = useState(null);
   const [isDocumentLoaded, setIsDocumentLoaded] = useState(false);
 
@@ -51,7 +55,7 @@ const Resume = ({ startGame, currentCollisionBoxes }) => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [currentCollisionBoxes]);
 
   function calculateScale() {
     const viewer = viewerRef.current;
@@ -63,8 +67,7 @@ const Resume = ({ startGame, currentCollisionBoxes }) => {
     if (!isDocumentLoaded) return;
 
     function handleResize() {
-      setScale(calculateScale());
-      console.log("scale", calculateScale());
+      setRenderScale(calculateScale());
     }
 
     window.addEventListener("resize", handleResize);
@@ -73,7 +76,7 @@ const Resume = ({ startGame, currentCollisionBoxes }) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [isDocumentLoaded]);
+  }, [isDocumentLoaded, setRenderScale]);
 
   const handleDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -97,7 +100,7 @@ const Resume = ({ startGame, currentCollisionBoxes }) => {
               <Page
                 key={`page_${index + 1}`}
                 pageNumber={index + 1}
-                scale={scale}
+                scale={renderScale}
                 textLayerMode={1}
               />
             ))}

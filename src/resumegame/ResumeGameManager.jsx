@@ -7,10 +7,11 @@ import Player from "./Player";
 const ResumeGameManager = () => {
   const currentCollisionBoxes = useRef([]);
   const [startGame, setStartGame] = useState(false);
+  const [renderScale, setRenderScale] = useState(1);
 
   useEffect(() => {
-    console.log("from resumegamemanager", currentCollisionBoxes.current);
-  }, [currentCollisionBoxes]);
+    console.log("renderscale", renderScale);
+  }, [renderScale]);
 
   return (
     <>
@@ -18,10 +19,13 @@ const ResumeGameManager = () => {
       <Resume
         startGame={startGame}
         currentCollisionBoxes={currentCollisionBoxes}
+        renderScale={renderScale}
+        setRenderScale={setRenderScale}
       />
       <Player
         startGame={startGame}
         currentCollisionBoxes={currentCollisionBoxes}
+        renderScale={renderScale}
       />
     </>
   );
